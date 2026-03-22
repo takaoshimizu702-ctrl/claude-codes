@@ -6,76 +6,552 @@
   <title>蕎麦占い</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif; background: linear-gradient(160deg, #1c1207 0%, #2e1f0a 50%, #1a1500 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #f0e6c8; }
-    .container { text-align: center; padding: 40px 24px; max-width: 640px; width: 100%; }
+
+    body {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+      background: #1e0f04;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f0e6c8;
+      overflow-x: hidden;
+    }
+
+    /* ─── 老舗蕎麦屋イラスト背景 ─── */
+    .bg-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* コンテンツはz-index:1で背景の上に */
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 24px;
+      max-width: 640px;
+      width: 100%;
+    }
+
     .title-area { margin-bottom: 36px; }
-    .title-jp { font-size: 2.6rem; letter-spacing: 10px; color: #f5d88a; text-shadow: 0 0 30px rgba(245,216,138,0.4); margin-bottom: 6px; }
-    .title-sub { font-size: 0.85rem; color: #a08c60; letter-spacing: 4px; }
-    .step-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(245,216,138,0.2); border-radius: 20px; padding: 28px 24px; margin-bottom: 20px; }
+    .title-jp {
+      font-size: 2.6rem;
+      letter-spacing: 10px;
+      color: #f5d88a;
+      text-shadow: 0 0 30px rgba(245,216,138,0.5), 0 0 60px rgba(245,216,138,0.2);
+      margin-bottom: 6px;
+    }
+    .title-sub { font-size: 0.85rem; color: #c8a870; letter-spacing: 4px; }
+
+    .step-card {
+      background: rgba(15,8,2,0.65);
+      border: 1px solid rgba(245,216,138,0.25);
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(6px);
+    }
     .step-label { font-size: 0.72rem; letter-spacing: 4px; color: #a08c60; margin-bottom: 14px; text-transform: uppercase; }
     .step-title { font-size: 1.05rem; color: #f5d88a; margin-bottom: 18px; letter-spacing: 2px; }
-    .year-select { appearance: none; background: rgba(245,216,138,0.08); border: 1px solid rgba(245,216,138,0.35); border-radius: 12px; color: #f0e6c8; font-family: inherit; font-size: 1.1rem; padding: 12px 48px 12px 20px; cursor: pointer; outline: none; width: 200px; letter-spacing: 2px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23f5d88a' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
+
+    .year-select {
+      appearance: none;
+      background: rgba(245,216,138,0.08);
+      border: 1px solid rgba(245,216,138,0.35);
+      border-radius: 12px;
+      color: #f0e6c8;
+      font-family: inherit;
+      font-size: 1.1rem;
+      padding: 12px 48px 12px 20px;
+      cursor: pointer;
+      outline: none;
+      width: 200px;
+      letter-spacing: 2px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23f5d88a' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+    .year-select:focus { border-color: rgba(245,216,138,0.7); box-shadow: 0 0 12px rgba(245,216,138,0.15); }
     .year-select option { background: #2e1f0a; color: #f0e6c8; }
-    .soba-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .soba-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(245,216,138,0.25); border-radius: 14px; color: #f0e6c8; cursor: pointer; font-family: inherit; font-size: 0.82rem; padding: 16px 8px; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; letter-spacing: 1px; }
+
+    .soba-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .soba-btn {
+      background: rgba(15,8,2,0.5);
+      border: 1px solid rgba(245,216,138,0.25);
+      border-radius: 14px;
+      color: #f0e6c8;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.82rem;
+      padding: 16px 8px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 1px;
+    }
     .soba-btn .soba-emoji { font-size: 2rem; }
-    .soba-btn:hover, .soba-btn.selected { background: rgba(245,216,138,0.14); border-color: rgba(245,216,138,0.7); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(245,216,138,0.15); color: #f5d88a; }
-    .fortune-btn { background: linear-gradient(135deg, #c8920a, #f5d88a); border: none; border-radius: 14px; color: #1c1207; cursor: pointer; font-family: inherit; font-size: 1.1rem; font-weight: bold; letter-spacing: 4px; padding: 16px 48px; transition: all 0.2s; margin-top: 8px; }
+    .soba-btn:hover, .soba-btn.selected {
+      background: rgba(245,216,138,0.14);
+      border-color: rgba(245,216,138,0.7);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(245,216,138,0.15);
+      color: #f5d88a;
+    }
+
+    .fortune-btn {
+      background: linear-gradient(135deg, #c8920a, #f5d88a);
+      border: none;
+      border-radius: 14px;
+      color: #1c1207;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: bold;
+      letter-spacing: 4px;
+      padding: 16px 48px;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
     .fortune-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,216,138,0.35); }
     .fortune-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
     .result-area { display: none; margin-top: 24px; }
     .result-area.show { display: block; animation: fadeIn 0.8s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    .result-card { background: rgba(255,255,255,0.04); border-radius: 20px; padding: 36px 28px; position: relative; overflow: hidden; }
-    .result-card::before { content: ''; position: absolute; inset: 0; border-radius: 20px; padding: 1px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card {
+      background: rgba(10,5,0,0.72);
+      border-radius: 20px;
+      padding: 36px 28px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      padding: 1px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
     .result-card.daikichi::before { background: linear-gradient(135deg, #f5d88a, #ff9f1c); }
-    .result-card.kichi::before { background: linear-gradient(135deg, #8ecae6, #a8dadc); }
-    .result-card.kyo::before { background: linear-gradient(135deg, #6d6875, #c77dff); }
-    .result-omikuji { font-size: 4.5rem; font-weight: bold; letter-spacing: 8px; margin-bottom: 8px; text-shadow: 0 0 40px currentColor; }
+    .result-card.kichi::before    { background: linear-gradient(135deg, #8ecae6, #a8dadc); }
+    .result-card.kyo::before      { background: linear-gradient(135deg, #6d6875, #c77dff); }
+
+    .result-omikuji {
+      font-size: 4.5rem;
+      font-weight: bold;
+      letter-spacing: 8px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 40px currentColor;
+    }
     .daikichi .result-omikuji { color: #f5d88a; }
-    .kichi .result-omikuji { color: #8ecae6; }
-    .kyo .result-omikuji { color: #c77dff; }
+    .kichi    .result-omikuji { color: #8ecae6; }
+    .kyo      .result-omikuji { color: #c77dff; }
+
     .result-soba { font-size: 0.9rem; color: #a08c60; letter-spacing: 3px; margin-bottom: 4px; }
     .result-year { font-size: 0.85rem; color: #a08c60; margin-bottom: 20px; }
-    .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,216,138,0.4), transparent); margin: 14px auto 20px; }
+
+    .divider {
+      width: 60px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245,216,138,0.4), transparent);
+      margin: 14px auto 20px;
+    }
+
     .fortune-text { font-size: 1.0rem; line-height: 2.0; color: #f0e6c8; letter-spacing: 1px; margin-bottom: 20px; }
     .fortune-text .keyword { display: inline-block; font-size: 0.78rem; letter-spacing: 2px; color: #a08c60; margin-bottom: 8px; }
     .fortune-main { font-size: 1.05rem; color: #f5ead2; font-weight: bold; }
     .fortune-detail { font-size: 0.88rem; color: #c8b888; line-height: 1.8; margin-top: 8px; }
-    .bonus-badge { display: inline-block; border-radius: 12px; padding: 12px 20px; font-size: 0.95rem; margin-top: 12px; line-height: 1.6; letter-spacing: 1px; }
+
+    .bonus-badge {
+      display: inline-block; border-radius: 12px; padding: 12px 20px;
+      font-size: 0.95rem; margin-top: 12px; line-height: 1.6; letter-spacing: 1px;
+    }
     .bonus-daikichi { background: rgba(245,216,138,0.12); border: 1px solid rgba(245,216,138,0.4); color: #f5d88a; }
     .bonus-kyo { background: rgba(199,125,255,0.1); border: 1px solid rgba(199,125,255,0.35); color: #d4a8ff; }
-    .reset-btn { display: inline-block; margin-top: 20px; background: transparent; border: 1px solid rgba(245,216,138,0.3); border-radius: 10px; color: #a08c60; cursor: pointer; font-family: inherit; font-size: 0.85rem; padding: 10px 28px; transition: all 0.2s; letter-spacing: 2px; }
+
+    .reset-btn {
+      display: inline-block; margin-top: 20px; background: transparent;
+      border: 1px solid rgba(245,216,138,0.3); border-radius: 10px;
+      color: #a08c60; cursor: pointer; font-family: inherit; font-size: 0.85rem;
+      padding: 10px 28px; transition: all 0.2s; letter-spacing: 2px;
+    }
     .reset-btn:hover { border-color: rgba(245,216,138,0.7); color: #f5d88a; }
-    .particles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: -1; }
-    .particle { position: absolute; width: 3px; height: 20px; background: rgba(245,216,138,0.15); border-radius: 2px; animation: fall linear infinite; }
-    @keyframes fall { from { transform: translateY(-20px) rotate(15deg); opacity: 0.6; } to { transform: translateY(110vh) rotate(15deg); opacity: 0; } }
+
+    /* 提灯のゆらぎアニメ */
+    @keyframes sway { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)} }
+    @keyframes flicker { 0%,100%{opacity:1} 45%{opacity:0.85} 50%{opacity:1} 92%{opacity:0.9} }
+    @keyframes steam {
+      0%   { transform: translateY(0) translateX(0) scaleX(1); opacity: 0.35; }
+      50%  { transform: translateY(-18px) translateX(4px) scaleX(1.3); opacity: 0.18; }
+      100% { transform: translateY(-36px) translateX(-2px) scaleX(0.8); opacity: 0; }
+    }
   </style>
 </head>
 <body>
-  <div class="particles" id="particles"></div>
+
+  <!-- ═══════════════════════════════════════════════
+       老舗蕎麦屋 SVGイラスト背景
+  ═══════════════════════════════════════════════ -->
+  <div class="bg-scene">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <!-- 木目壁グラデ -->
+        <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#1a0a02"/>
+          <stop offset="40%"  stop-color="#2e1508"/>
+          <stop offset="100%" stop-color="#1a0a02"/>
+        </linearGradient>
+        <!-- 板目グラデ（横） -->
+        <linearGradient id="plankGrad1" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#4a2810" stop-opacity="0.6"/>
+          <stop offset="30%"  stop-color="#6b3c18" stop-opacity="0.4"/>
+          <stop offset="70%"  stop-color="#5a3214" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#3e2009" stop-opacity="0.6"/>
+        </linearGradient>
+        <linearGradient id="plankGrad2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#3a1e08" stop-opacity="0.5"/>
+          <stop offset="50%"  stop-color="#5c3015" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#3a1e08" stop-opacity="0.5"/>
+        </linearGradient>
+        <!-- 床グラデ -->
+        <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#3e2008"/>
+          <stop offset="100%" stop-color="#1a0a02"/>
+        </linearGradient>
+        <!-- 提灯グラデ（赤） -->
+        <radialGradient id="lanternGrad1" cx="50%" cy="40%" r="55%">
+          <stop offset="0%"   stop-color="#ff9955"/>
+          <stop offset="60%"  stop-color="#cc3300"/>
+          <stop offset="100%" stop-color="#881400"/>
+        </radialGradient>
+        <radialGradient id="lanternGrad2" cx="50%" cy="40%" r="55%">
+          <stop offset="0%"   stop-color="#ffaa66"/>
+          <stop offset="60%"  stop-color="#dd4411"/>
+          <stop offset="100%" stop-color="#991800"/>
+        </radialGradient>
+        <!-- 提灯の光 -->
+        <radialGradient id="lanternGlow1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#ff8833" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#ff4400" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="lanternGlow2" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#ff9944" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#ff4400" stop-opacity="0"/>
+        </radialGradient>
+        <!-- のれん -->
+        <linearGradient id="norenGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#0f1e4a"/>
+          <stop offset="100%" stop-color="#1a3066"/>
+        </linearGradient>
+        <!-- 天井グラデ -->
+        <linearGradient id="ceilGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#100701"/>
+          <stop offset="100%" stop-color="#1c0d03"/>
+        </linearGradient>
+        <!-- 窓のぼんやりした光 -->
+        <radialGradient id="windowGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#ffe4a0" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#ffe4a0" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- ─── 背景壁 ─── -->
+      <rect width="1200" height="900" fill="url(#wallGrad)"/>
+
+      <!-- 壁の縦板目（薄く） -->
+      <g opacity="0.35">
+        <rect x="0"    y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="58"   y="0" width="1.5" height="900" fill="#5c3015"/>
+        <rect x="112"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="170"  y="0" width="2"   height="900" fill="#4a2810"/>
+        <rect x="225"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="280"  y="0" width="1.5" height="900" fill="#5c3015"/>
+        <rect x="340"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="395"  y="0" width="2"   height="900" fill="#4a2810"/>
+        <rect x="450"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="505"  y="0" width="1.5" height="900" fill="#5c3015"/>
+        <rect x="560"  y="0" width="2"   height="900" fill="#4a2810"/>
+        <rect x="618"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="672"  y="0" width="1.5" height="900" fill="#5c3015"/>
+        <rect x="728"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="785"  y="0" width="2"   height="900" fill="#4a2810"/>
+        <rect x="840"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="895"  y="0" width="1.5" height="900" fill="#5c3015"/>
+        <rect x="952"  y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="1008" y="0" width="2"   height="900" fill="#4a2810"/>
+        <rect x="1065" y="0" width="1"   height="900" fill="#6b3c18"/>
+        <rect x="1120" y="0" width="1.5" height="900" fill="#5c3015"/>
+        <rect x="1178" y="0" width="1"   height="900" fill="#6b3c18"/>
+      </g>
+
+      <!-- ─── 天井 ─── -->
+      <rect width="1200" height="140" fill="url(#ceilGrad)"/>
+      <!-- 天井の横木目 -->
+      <g opacity="0.5">
+        <rect y="18" width="1200" height="3" fill="#3a1e08"/>
+        <rect y="36" width="1200" height="2" fill="#2e1508" opacity="0.7"/>
+        <rect y="54" width="1200" height="3" fill="#3a1e08"/>
+        <rect y="72" width="1200" height="2" fill="#2e1508" opacity="0.7"/>
+        <rect y="90" width="1200" height="3" fill="#3a1e08"/>
+        <rect y="108" width="1200" height="2" fill="#2e1508" opacity="0.7"/>
+        <rect y="126" width="1200" height="3" fill="#3a1e08"/>
+      </g>
+
+      <!-- ─── 鴨居（上の横梁） ─── -->
+      <rect y="130" width="1200" height="22" fill="#4a2810"/>
+      <rect y="130" width="1200" height="22" fill="url(#plankGrad1)"/>
+      <rect y="130" width="1200" height="2"  fill="#6b3c18" opacity="0.6"/>
+      <rect y="150" width="1200" height="2"  fill="#1a0a02" opacity="0.8"/>
+
+      <!-- ─── 床 ─── -->
+      <rect y="760" width="1200" height="140" fill="url(#floorGrad)"/>
+      <!-- 床の横板目 -->
+      <g opacity="0.6">
+        <rect y="760" width="1200" height="2" fill="#5a3214"/>
+        <rect y="780" width="1200" height="2" fill="#4a2810"/>
+        <rect y="800" width="1200" height="2" fill="#5a3214"/>
+        <rect y="820" width="1200" height="2" fill="#4a2810"/>
+        <rect y="840" width="1200" height="2" fill="#5a3214"/>
+        <rect y="860" width="1200" height="2" fill="#4a2810"/>
+      </g>
+      <!-- 床と壁の境の幅木 -->
+      <rect y="755" width="1200" height="8" fill="#6b3c18"/>
+      <rect y="755" width="1200" height="8" fill="url(#plankGrad1)"/>
+
+      <!-- ─── 壁の横板（腰壁） ─── -->
+      <g opacity="0.4">
+        <rect y="660" width="1200" height="3" fill="#6b3c18"/>
+        <rect y="680" width="1200" height="2" fill="#4a2810"/>
+        <rect y="700" width="1200" height="3" fill="#6b3c18"/>
+        <rect y="720" width="1200" height="2" fill="#4a2810"/>
+        <rect y="740" width="1200" height="3" fill="#6b3c18"/>
+      </g>
+
+      <!-- ─── のれん（左エリア） ─── -->
+      <g transform="translate(95, 152)">
+        <!-- のれん棒 -->
+        <rect x="-5" y="-4" width="210" height="8" rx="4" fill="#6b3c18"/>
+        <!-- のれん布 5枚 -->
+        <!-- 1枚目 -->
+        <rect x="0"   y="4" width="36" height="160" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="0"   y="4" width="36" height="6"   fill="#0a1530"/>
+        <text x="18" y="90" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="22" fill="#c8d8f0" opacity="0.9" transform="rotate(0)">そ</text>
+        <!-- 2枚目 -->
+        <rect x="42"  y="4" width="36" height="155" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="42"  y="4" width="36" height="6"   fill="#0a1530"/>
+        <text x="60" y="88" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="22" fill="#c8d8f0" opacity="0.9">ば</text>
+        <!-- 3枚目 -->
+        <rect x="84"  y="4" width="36" height="162" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="84"  y="4" width="36" height="6"   fill="#0a1530"/>
+        <text x="102" y="92" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="22" fill="#c8d8f0" opacity="0.9">処</text>
+        <!-- 4枚目 -->
+        <rect x="126" y="4" width="36" height="150" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="126" y="4" width="36" height="6"   fill="#0a1530"/>
+        <!-- 家紋っぽいマル -->
+        <circle cx="144" cy="80" r="14" fill="none" stroke="#c8d8f0" stroke-width="1.5" opacity="0.7"/>
+        <text x="144" y="85" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="13" fill="#c8d8f0" opacity="0.7">蕎</text>
+        <!-- 5枚目 -->
+        <rect x="168" y="4" width="36" height="158" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="168" y="4" width="36" height="6"   fill="#0a1530"/>
+        <circle cx="186" cy="80" r="14" fill="none" stroke="#c8d8f0" stroke-width="1.5" opacity="0.7"/>
+        <text x="186" y="85" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="13" fill="#c8d8f0" opacity="0.7">麦</text>
+      </g>
+
+      <!-- ─── のれん（右エリア） ─── -->
+      <g transform="translate(895, 152)">
+        <rect x="-5" y="-4" width="210" height="8" rx="4" fill="#6b3c18"/>
+        <rect x="0"   y="4" width="36" height="158" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="0"   y="4" width="36" height="6"   fill="#0a1530"/>
+        <circle cx="18" cy="80" r="14" fill="none" stroke="#c8d8f0" stroke-width="1.5" opacity="0.7"/>
+        <text x="18" y="85" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="13" fill="#c8d8f0" opacity="0.7">蕎</text>
+
+        <rect x="42"  y="4" width="36" height="153" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="42"  y="4" width="36" height="6"   fill="#0a1530"/>
+        <text x="60"  y="88" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="22" fill="#c8d8f0" opacity="0.9">そ</text>
+
+        <rect x="84"  y="4" width="36" height="162" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="84"  y="4" width="36" height="6"   fill="#0a1530"/>
+        <text x="102" y="92" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="22" fill="#c8d8f0" opacity="0.9">ば</text>
+
+        <rect x="126" y="4" width="36" height="155" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="126" y="4" width="36" height="6"   fill="#0a1530"/>
+        <text x="144" y="88" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="22" fill="#c8d8f0" opacity="0.9">処</text>
+
+        <rect x="168" y="4" width="36" height="160" rx="0 0 6 6" fill="url(#norenGrad)"/>
+        <rect x="168" y="4" width="36" height="6"   fill="#0a1530"/>
+        <circle cx="186" cy="80" r="14" fill="none" stroke="#c8d8f0" stroke-width="1.5" opacity="0.7"/>
+        <text x="186" y="85" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="13" fill="#c8d8f0" opacity="0.7">麦</text>
+      </g>
+
+      <!-- ─── 左の提灯 ─── -->
+      <g style="animation: sway 4s ease-in-out infinite; transform-origin: 170px 155px;">
+        <!-- 提灯の光のフレア -->
+        <ellipse cx="170" cy="260" rx="110" ry="110" fill="url(#lanternGlow1)" style="animation: flicker 3.5s ease-in-out infinite;"/>
+        <!-- 紐 -->
+        <line x1="170" y1="152" x2="170" y2="185" stroke="#4a2810" stroke-width="2"/>
+        <!-- 提灯本体 -->
+        <ellipse cx="170" cy="222" rx="42" ry="12" fill="#440f00"/>
+        <ellipse cx="170" cy="290" rx="42" ry="12" fill="#440f00"/>
+        <path d="M128,222 Q106,256 128,290 Q148,310 170,312 Q192,310 212,290 Q234,256 212,222" fill="url(#lanternGrad1)" style="animation: flicker 3.5s ease-in-out infinite;"/>
+        <!-- 提灯のリング線 -->
+        <ellipse cx="170" cy="235" rx="41" ry="8" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.4"/>
+        <ellipse cx="170" cy="248" rx="42" ry="9" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.3"/>
+        <ellipse cx="170" cy="262" rx="42" ry="9" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.4"/>
+        <ellipse cx="170" cy="276" rx="41" ry="8" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.3"/>
+        <!-- 光の反射 -->
+        <ellipse cx="152" cy="245" rx="10" ry="18" fill="white" opacity="0.08"/>
+        <!-- 提灯の文字 -->
+        <text x="170" y="268" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="26" font-weight="bold" fill="#fff7e0" opacity="0.9" style="animation: flicker 3.5s ease-in-out infinite;">蕎</text>
+        <!-- $��の飾り紐 -->
+        <line x1="170" y1="302" x2="170" y2="330" stroke="#4a2810" stroke-width="1.5"/>
+        <ellipse cx="170" cy="334" rx="5" ry="3" fill="#cc3300" opacity="0.7"/>
+      </g>
+
+      <!-- ─── 右の提灯 ─── -->
+      <g style="animation: sway 5s ease-in-out infinite 1s; transform-origin: 1030px 155px;">
+        <ellipse cx="1030" cy="260" rx="110" ry="110" fill="url(#lanternGlow2)" style="animation: flicker 4.2s ease-in-out infinite 0.5s;"/>
+        <line x1="1030" y1="152" x2="1030" y2="185" stroke="#4a2810" stroke-width="2"/>
+        <ellipse cx="1030" cy="222" rx="42" ry="12" fill="#440f00"/>
+        <ellipse cx="1030" cy="290" rx="42" ry="12" fill="#440f00"/>
+        <path d="M988,222 Q966,256 988,290 Q1008,310 1030,312 Q1052,310 1072,290 Q1094,256 1072,222" fill="url(#lanternGrad2)" style="animation: flicker 4.2s ease-in-out infinite 0.5s;"/>
+        <ellipse cx="1030" cy="235" rx="41" ry="8" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.4"/>
+        <ellipse cx="1030" cy="248" rx="42" ry="9" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.3"/>
+        <ellipse cx="1030" cy="262" rx="42" ry="9" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.4"/>
+        <ellipse cx="1030" cy="276" rx="41" ry="8" fill="none" stroke="#cc3300" stroke-width="1" opacity="0.3"/>
+        <ellipse cx="1012" cy="245" rx="10" ry="18" fill="white" opacity="0.08"/>
+        <text x="1030" y="268" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="26" font-weight="bold" fill="#fff7e0" opacity="0.9" style="animation: flicker 4.2s ease-in-out infinite 0.5s;">麦</text>
+        <line x1="1030" y1="302" x2="1030" y2="330" stroke="#4a2810" stroke-width="1.5"/>
+        <ellipse cx="1030" cy="334" rx="5" ry="3" fill="#cc3300" opacity="0.7"/>
+      </g>
+
+      <!-- ─── 縦看板（左壁） ─── -->
+      <g transform="translate(30, 220)">
+        <rect x="0" y="0" width="44" height="280" rx="4" fill="#2a1508"/>
+        <rect x="0" y="0" width="44" height="280" rx="4" fill="none" stroke="#6b3c18" stroke-width="2"/>
+        <rect x="4" y="4" width="36" height="272" rx="2" fill="none" stroke="#4a2810" stroke-width="1" opacity="0.5"/>
+        <text x="22" y="55"  text-anchor="middle" font-family="'Hiragino Mincho ProN',�Yu Mincho',serif" font-size="20" fill="#f5d88a" opacity="0.8">手</text>
+        <text x="22" y="85"  text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="20" fill="#f5d88a" opacity="0.8">打</text>
+        <text x="22" y="115" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="20" fill="#f5d88a" opacity="0.8">ち</text>
+        <text x="22" y="155" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="24" fill="#f5d88a" opacity="0.9">蕎</text>
+        <text x="22" y="185" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="24" fill="#f5d88a" opacity="0.9">麦</text>
+        <line x1="10" y1="130" x2="34" y2="130" stroke="#6b3c18" stroke-width="1" opacity="0.6"/>
+        <line x1="10" y1="205" x2="34" y2="205" stroke="#6b3c18" stroke-width="1" opacity="0.6"/>
+        <text x="22" y="235" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="13" fill="#c8a870" opacity="0.7">本</text>
+        <text x="22" y="255" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="13" fill="#c8a870" opacity="0.7">日</text>
+      </g>
+
+      <!-- ─── 縦看板（右壁） ─── -->
+      <g transform="translate(1126, 220)">
+        <rect x="0" y="0" width="44" height="260" rx="4" fill="#2a1508"/>
+        <rect x="0" y="0" width="44" height="260" rx="4" fill="none" stroke="#6b3c18" stroke-width="2"/>
+        <rect x="4" y="4" width="36" height="252" rx="2" fill="none" stroke="#4a2810" stroke-width="1" opacity="0.5"/>
+        <text x="22" y="55"  text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="20" fill="#f5d88a" opacity="0.8">開</text>
+        <text x="22" y="85"  text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="20" fill="#f5d88a" opacity="0.8">運</text>
+        <line x1="10" y1="105" x2="34" y2="105" stroke="#6b3c18" stroke-width="1" opacity="0.6"/>
+        <text x="22" y="140" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="24" fill="#f5d88a" opacity="0.9">蕎</text>
+        <text x="22" y="170" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="24" fill="#f5d88a" opacity="0.9">麦</text>
+        <text x="22" y="200" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="24" fill="#f5d88a" opacity="0.9">占</text>
+        <text x="22" y="230" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="24" fill="#f5d88a" opacity="0.9">い</text>
+      </g>
+
+      <!-- ─── カウンター台（手前） ─── -->
+      <rect y="740" width="1200" height="25" fill="#5a3214"/>
+      <rect y="740" width="1200" height="25" fill="url(#plankGrad1)"/>
+      <rect y="740" width="1200" height="3"  fill="#8c5228" opacity="0.5"/>
+      <rect y="762" width="1200" height="3"  fill="#1a0a02" opacity="0.7"/>
+
+      <!-- ─── 丼（蕎麦の器）左 ─── -->
+      <g transform="translate(310, 700)" opacity="0.5">
+        <ellipse cx="0" cy="0" rx="42" ry="14" fill="#2a1508"/>
+        <path d="M-42,0 Q-38,40 0,40 Q38,40 42,0 Z" fill="#3c1e08"/>
+        <path d="M-42,0 Q-38,40 0,40 Q38,40 42,0 Z" fill="none" stroke="#6b3c18" stroke-width="1.5"/>
+        <ellipse cx="0" cy="0" rx="42" ry="14" fill="#4a2810"/>
+        <ellipse cx="0" cy="0" rx="38" ry="11" fill="#2a1508"/>
+        <!-- 湯気 -->
+        <path d="M-10,-5 Q-6,-20 -10,-35" fill="none" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round" style="animation: steam 2.5s ease-out infinite;"/>
+        <path d="M0,-5 Q4,-22 0,-38" fill="none" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round" style="animation: steam 2.5s ease-out infinite 0.7s;"/>
+        <path d="M10,-5 Q14,-18 10,-32" fill="none" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round" style="animation: steam 2.5s ease-out infinite 1.4s;"/>
+      </g>
+
+      <!-- ─── 丼（蕎麦の器）右 ─── -->
+      <g transform="translate(890, 705)" opacity="0.45">
+        <ellipse cx="0" cy="0" rx="42" ry="14" fill="#2a1508"/>
+        <path d="M-42,0 Q-38,40 0,40 Q38,40 42,0 Z" fill="#3c1e08"/>
+        <path d="M-42,0 Q-38,40 0,40 Q38,40 42,0 Z" fill="none" stroke="#6b3c18" stroke-width="1.5"/>
+        <ellipse cx="0" cy="0" rx="42" ry="14" fill="#4a2810"/>
+        <ellipse cx="0" cy="0" rx="38" ry="11" fill="#2a1508"/>
+        <path d="M-10,-5 Q-6,-20 -10,-35" fill="none" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round" style="animation: steam 3s ease-out infinite 0.5s;"/>
+        <path d="M0,-5 Q4,-22 0,-38" fill="none" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round" style="animation: steam 3s ease-out infinite 1.2s;"/>
+        <path d="M10,-5 Q14,-18 10,-32" fill="none" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round" style="animation: steam 3s ease-out infinite 1.9s;"/>
+      </g>
+
+      <!-- ─── 下から来る光のグラデ（雰囲気） ─── -->
+      <rect y="600" width="1200" height="300" fill="url(#windowGlow)" opacity="0.3"/>
+
+      <!-- ─── 全体に軽くオーバーレイ（暗く落ち着かせる） ─── -->
+      <rect width="1200" height="900" fill="#0a0500" opacity="0.22"/>
+    </svg>
+  </div>
+
   <div class="container">
     <div class="title-area">
       <div class="title-jp">蕎　麦　占　い</div>
       <div class="title-sub">SOBA FORTUNE TELLING</div>
     </div>
+
+    <!-- STEP 1 -->
     <div class="step-card">
       <div class="step-label">Step 1</div>
       <div class="step-title">🎋 生まれ年を選んでください</div>
-      <select class="year-select" id="yearSelect"><option value="">— 西暦 —</option></select>
+      <select class="year-select" id="yearSelect">
+        <option value="">— 西暦 —</option>
+      </select>
     </div>
+
+    <!-- STEP 2 -->
     <div class="step-card">
       <div class="step-label">Step 2</div>
       <div class="step-title">🍜 お蕎麦を一品お選びください</div>
       <div class="soba-grid">
-        <button class="soba-btn" onclick="selectSoba(this,'せいろそば')"><span class="soba-emoji">🍱</span>せいろそば</button>
-        <button class="soba-btn" onclick="selectSoba(this,'かけそば')"><span class="soba-emoji">🍜</span>かけそば</button>
-        <button class="soba-btn" onclick="selectSoba(this,'納豆そば')"><span class="soba-emoji">🫘</span>納豆そば</button>
-        <button class="soba-btn" onclick="selectSoba(this,'鴨せいろ蕎麦')"><span class="soba-emoji">🦆</span>鴨せいろ蕎麦</button>
-        <button class="soba-btn" onclick="selectSoba(this,'天ぷらせいろ')"><span class="soba-emoji">🍤</span>天ぷらせいろ</button>
+        <button class="soba-btn" onclick="selectSoba(this,'せいろそば')">
+          <span class="soba-emoji">🍱</span>せいろそば
+        </button>
+        <button class="soba-btn" onclick="selectSoba(this,'かけそば')">
+          <span class="soba-emoji">🍜</span>かけそば
+        </button>
+        <button class="soba-btn" onclick="selectSoba(this,'納豆そば')">
+          <span class="soba-emoji">🫘</span>納豆そば
+        </button>
+        <button class="soba-btn" onclick="selectSoba(this,'鴨せいろ蕎麦')">
+          <span class="soba-emoji">🦆</span>鴨せいろ蕎麦
+        </button>
+        <button class="soba-btn" onclick="selectSoba(this,'天ぷらせいろ')">
+          <span class="soba-emoji">🍤</span>天ぷらせいろ
+        </button>
       </div>
     </div>
-    <button class="fortune-btn" id="fortuneBtn" onclick="drawFortune()" disabled>✨ 占 う ✨</button>
+
+    <button class="fortune-btn" id="fortuneBtn" onclick="drawFortune()" disabled>
+      ✨ 占 う ✨
+    </button>
+
     <div class="result-area" id="resultArea">
       <div class="result-card" id="resultCard">
         <div class="result-omikuji" id="resultOmikuji"></div>
@@ -85,37 +561,52 @@
         <div class="fortune-text" id="fortuneText"></div>
         <div id="bonusArea"></div>
       </div>
-      <button class="reset-btn" onclick="resetAll()">🔄 もう一度占う</button>
+      <button class="reset-btn" onclick="resetAll()">🔄 もう4��度占う</button>
     </div>
   </div>
+
   <script>
     const fortunes = {
       大吉: [
         { keyword:'【 運勢 ・ 大吉 】', main:'万事において天の恵みを受ける時。\n思い切って行動すれば、必ず道は開ける。', detail:'願い事は叶う。待ち人は来たる。失せ物は見つかる。\n旅行・商売・縁談、すべてに好機あり。' },
-        { keyword:'【 運勢 ・ 大吉 】', main:'春の陽光のごとく、あらゆる幸が満ちあふれる。\n積み重ねてきた努力が、今まさに花開く吉運。', detail:'恋愛・仕事・健康のすべてに追い風が吹いている。\n人との縁を大切にすれば、さらなる幸が舞い込む。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'春の陽光のごとく、あらゆる幸が満ちあぽれる。\n積み重ねてきた努力が、今まさに花開く吉運。', detail:'恋愛・仕事・健康のすべてに追い風が吹いている。\n人との縁を大切にすれば、さらなる幸が舞い込む。' },
         { keyword:'【 運勢 ・ 大吉 】', main:'天地の気が整い、何事も順調に進む。\n今日の出会いは一生の宝になるかもしれない。', detail:'健康運・金運ともに好調。新しいことを始めるには最良の日。\n素直な心で物事にあたれ。吉はさらに大きくなる。' },
         { keyword:'【 運勢 ・ 大吉 】', main:'高い山の頂から見渡すように、視野が広がる時。\n迷いを捨て、信念を持って歩めば、幸運は続く。', detail:'仕事は大きな成果を得る。恋は深まる。\n行動力こそが今日の運気をさらに高める鍵。' },
         { keyword:'【 運勢 ・ 大吉 】', main:'長い雨の後の虹のように、明るい未来が目前に広がる。\n今まで耐えてきた苦労が、光輝く結果となって返ってくる。', detail:'対人運抜群。周囲の人からの信頼も高まる。\n金運・健康運ともに上昇中。今日は思い切って動くべし。' },
         { keyword:'【 運勢 ・ 大吉 】', main:'清流のように心が澄み渡り、迷いが消える。\nあなたの誠実さが、今日は特別な幸運を引き寄せる。', detail:'願いは叶う。縁談・商談に好機。\n感謝の心を忘れずにいれば、吉運は何倍にもなる。' },
         { keyword:'【 運勢 ・ 大吉 】', main:'星が並ぶように、好機が重なる特別な一日。\n目の前のチャンスを恐れず掴みに行くべき時。', detail:'旅先での出会い・思わぬ吉報が舞い込む暗示。\n心を開いて人と接すれば、さらなる吉運が訪れる。' },
         { keyword:'【 運勢 ・ 大吉 】', main:'大地が実りを授けるように、今日の行動はすべて実を結ぶ。\n努力を怠らず、感謝を持って動けば万事成就。', detail:'健康・恋愛・仕事のいずれも順調。\n今日はいつも以上に自分を信じて行動せよ。' },
-        { keyword:'【 運勢 ・ 大吉 】', main:'吉風が四方から吹き込み、幸運に包まれる。\n積極的に行動することで、さらなる幸をつかむことができる。', detail:'金運上昇の兆し。人間関係も円滑に進む。\n今日という日を大切に過ごせば、明日の運気もさらに輝く。' },
-        { keyword:'【 運勢 ・ 大吉 】', main:'百花繚乱、あらゆる分野で花が咲き誇る。\n今日のあなたには、まばゆいほどの運気が宿っている。', detail:'恋愛・仕事・健康、三拍子そろった最高の吉日。\n喜びを周囲と分かち合えば、その幸はさらに大きくなる。' }
-      ],
-      吉: [
-        { keyword:'【 運勢 ・ 吉 】', main:'穏やかな風が吹く、安心の一日。\n焦らず、ゆっくりと歩めば、望むところへたどり着ける。', detail:'急ぐと迷うことあり。まず足元を固めよ。\n誠実な言動が、周囲の信頼を高めていく。' },
-        { keyword:'【 運勢 ・ 吉 】', main:'物事は徐々に好転する兆し。\n地道な努力が報われる喜びを、もうすぐ感じることができる。', detail:'焦りは禁物。目の前のことに集中することが吉。\n信頼できる人のアドバイスを素直に受け入れると道が開ける。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'吉風が四方から吹き込み、幸運に包まれる。\n積極的に行動することで、さらなる幸をつかむことができる。', detail:'金運上昇の兆し。人間関係も円滑に進む。\n今日とう�^��
+K����"���;�S�o�Î�b;�^����/��_�
+�W�
+'����w�?�����(��������쁭��ݽɐ蟎@��/�.���샖���B$��D�������蟞f��*Ǟ�k��ǎ��
+'�
+�
+/�"�;���*ǎ3�Jˎ7���
+/�	q���+�^���������������Î
+�������/��_�3���������
+/������х��蟚/�o���W��/�����ߎ��'�.7��C�w�
+7����r��c���B'�^��	q��Zs�ώ
+K�F��nˎ��"�/���B#�#�Î�w�������W�
+'������7�?���
+/����(������t�(�������B$�l(��������쁭��ݽɐ蟎@��/�.���샖B$��D�������蟞�?�
+�/������3�B�?���'�������^��	q����
+'�k��
+�3������7���Zs�ώ����
+/�	q��r���ۖB'����k����3���ێ
+K�J��
++�i����
+K�B�
++�
+/������х��蟦��C�����O����
++����k�����7�O���*#��
+#�	�r�����W�v�&C�~8	��X�"8;�Y�8	r����~x��K��8�[�8^8�Z[ދ�.8�8(�XXn8~8%��Y��>8�X��X��8�Z8(�8(�8(�Yi�8>8).88(.8n8�8hI�8�8(�8>8�8�8~8�8(�8"r�FWF�â~xJn8(�8�ず自然体で禁物。目の前のことに集中することが吉。\n信頼できる人のアドバイスを素直に受け入れると道が開ける。' },
         { keyword:'【 運勢 ・ 吉 】', main:'小さな幸せが積み重なり、やがて大きな喜びとなる。\n今日の丁寧な行動が、明日の運勢をさらに引き上げる。', detail:'恋愛は焦らず自然体で。仕事は丁寧さが評価される。\n健康面は食事と睡眠を大切に。' },
         { keyword:'【 運勢 ・ 吉 】', main:'曇り空に光が差し込むように、希望の兆しが見える。\n今は準備の時。機が熟せば、大きな実りが待っている。', detail:'焦らず、コツコツと積み上げることが大切な時期。\n信じた道を歩み続ければ、必ず報われる。' },
         { keyword:'【 運勢 ・ 吉 】', main:'静かな川が海へと続くように、今の努力は未来につながる。\n人の縁を大切にすると、思わぬ幸運が舞い込む。', detail:'対人運良好。感謝の言葉を伝えると関係が深まる。\n金運は安定。無駄遣いを避ければ、じわりと上昇する。' },
         { keyword:'【 運勢 ・ 吉 】', main:'堅実な歩みの中に、確かな喜びが宿る。\n今日の誠実さが、やがて大きな信頼となって戻ってくる。', detail:'仕事は地道な取り組みが評価される。\n恋愛は素直な気持ちを大切に。無理をせず自然体でいること。' },
         { keyword:'【 運勢 ・ 吉 】', main:'新芽が大地から顔を出すように、可能性が膨らむ。\n今日の一歩が、将来の大きな飛躍につながる大切な歩み。', detail:'新しいことへの挑戦に吉の日。失敗を恐れず動くべし。\n周囲への感謝を忘れずにいれば、運は自ずとついてくる。' },
-        { keyword:'【 運勢 ・ 吉 】', main:'秋の実りのように、着実に成果が積み上がる。\nじっくりと時間をかけることで、揺るぎない幸運が訪れる。', detail:'健康運は良好。規則正しい生活がさらに運気を高める。\n仕事・学業ともに努力が正当に評価される時期。' },
-        { keyword:'【 運勢 ・ 吉 】', main:'温かい光が差し込み、心に平和が宿る日。\n誠実な言葉と行動が、幸運を引き寄せる鍵となる。', detail:'人間関係は良好。自分から積極的に話しかけると縁が広がる。\n金運は堅調。計画的な行動が吉を引き寄せる。' },
-        { keyword:'【 運勢 ・ 吉 】', main:'緑の木々が風にそよぐように、柔らかな運気が満ちる。\n無理をせず、自分らしくいることが今日の最大の幸運。', detail:'ゆとりを持った行動が吉。心の余裕が周囲を和ませる。\n信頼できる人とともに歩めば、迷いなく前へ進める。' }
-      ],
-      凶: [
-        { keyword:'【 運勢 ・ 凶 】', main:'今は嵐の前の静けさ。無理に動かず、静かに備える時。\n辛抱強く待つことが、やがて大きな幸運を呼び込む。', detail:'急いては事を仕損じる日。慎重な判断が大切。\n人との争いごとは避け、穏やかな心で過ごすべし。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'秋の実りのように、着実に成果が積み上がる。\nじっくりと時間をかけることで、揺るぎなぅnn:`b��c:**��8��� ��]Z[��`iyn��`b��k�"k�iox� �)��ba��h��e��a9�'��.��c8�ex�x�j�`b��%�ऺj�8�x��� ��.�y.�����ki��kx�j8࠸�j�b��b���c9�h�od��j�*ey/�x�ex�8���`��'�� ��K���^]�ܙ���$:`b�b�8���9d"H8�$I�XZ[����*x�b��a9abx�c9m��e�/�8�o�� yo���j�nl�d�8�c9k������x� ��*�9k���j�* :$bx�j:(c9b�x�c8� ynn:`b�हo%x�cyk�8�f���cmx�j8�j���� ��]Z[��.��e��e��/��k�"k�iox� �!�b!��b��y�cy�my�8�j�*lx�e��b��dx���j9� x�c9n���c8��� ��a�z`b��k�h!z*��� �*"9�.��8�j�(c9b�x�c9d"xहo%x�cyk�8�f���� ��K���^]�ܙ���$:`b�b�8���9d"H8�$I�XZ[�����x�k��*8�!x�c:h�8�j��gx�8�d8�8�a��j�� y��8�x�b��j�`b��%��c9��8�hx��� ���(y�!�स�f��f�� z!�b!��x�e��c��a8���d��j8�c9.⹥�x�k�� 9i)��k�nn:`b�� ��]Z[��ࡸ�j8ࢸह� x�h��g�(c9b�x�c9d"x� �o���k�/fz(�x�c9dj9f�हd�8�o��f���� ��/�zh/8�i��cx��.���j8�j8࠸�j��jx�x�l8� z/���a8�j��c�bcx�n:`,��x��� ��B�K�9a펈��^]�ܙ���$:i��勢 ・ 凶 】', main:'今は嵐の前の静けさ。無理に動かず、静かに備える時。\n辛抱強く待つことが、やがて大きな幸運を呼び込む。', detail:'急いては事を仕損じる日。慎重な判断が大切。\n人との争いごとは避け、穏やかな心で過ごすべし。' },
         { keyword:'【 運勢 ・ 凶 】', main:'思うようにいかないことがあるかもしれないが、それは次のための伏線。\n焦らず、しっかりと足元を固めることが肝要。', detail:'今は守りの時期。新しいことへの着手は慎重に。\nただし、誠実な行動をとり続ければ、運気は必ず転じる。' },
         { keyword:'【 運勢 ・ 凶 】', main:'霧の中を歩くような、見通しの悪い一日かもしれない。\nしかし霧は必ず晴れる。今は慌てず一歩一歩進むのみ。', detail:'軽率な言動は控えるべし。丁寧な行動が運を開く。\n信頼できる人の言葉に耳を傾けることが大切。' },
         { keyword:'【 運勢 ・ 凶 】', main:'波が高い日は船を出さぬのが賢者の知恵。\n無理な計画は控え、今できることに集中する日。', detail:'健康面に注意。無理をせず休息を大切に。\n今日の辛抱が、明日の大吉への第一歩となる。' },
@@ -123,10 +614,11 @@
         { keyword:'【 運勢 ・ 凶 】', main:'冬の寒さが春を呼ぶように、今の困難は明るい未来への序章。\n諦めず、誠実に過ごすことで運は必ず向きを変える。', detail:'今日は重要な決断を避けた方が無難。\n小さな親切を積み重ねることが、運気好転のカギとなる。' },
         { keyword:'【 運勢 ・ 凶 】', main:'今は種を蒔く時。すぐに実らなくても、地道な努力を続けよ。\n誠実な心は必ず天に届き、やがて大きな実りをもたらす。', detail:'衝動的な行動は控えること。じっくり考えてから動くべし。\n身近な人への感謝を忘れないことが、運の転換点となる。' },
         { keyword:'【 運勢 ・ 凶 】', main:'曲がりくねった道の先に、美しい景色が待っている。\n今は道が険しくとも、歩みを止めないことが大切。', detail:'無理をせず、できることに集中するのが吉。\n口は禍の元。今日は言葉を慎み、行動で示すべし。' },
-        { keyword:'【 運勢 ・ 凶 】', main:'竹が節をつくるように、今の苦しみは次の飛躍のための節目。\n腐らず、ただ前を向いて歩め。', detail:'健康・金運ともに注意が必要な時期。無駄遣いは控えよ。\n誠実さを貫けば、周囲からの助けが得られる暗示あり。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'竹が節をつくるように、今の苦しみは次の飛躍のための節目。\n腐らず、腐らず、ただ前を向いて歩め。', detail:'健康・金運ともに注意が必要な時期。無駄遣いは控えよ。\n誠実さを貫けば、周囲からの助けが得られる暗示あり。' },
         { keyword:'【 運勢 ・ 凶 】', main:'今日の不運は長くは続かない。嵐のあとには必ず虹が出る。\n今は静かに嵐が過ぎるのを待ち、エネルギーを蓄える時。', detail:'人との衝突に注意。自分から折れることで丸く収まる。\n小さな幸せに気づく心が、やがて大きな運気を呼び込む。' }
       ]
     };
+
     const yearSelect = document.getElementById('yearSelect');
     for (let y = 2026; y >= 1930; y--) {
       const opt = document.createElement('option');
@@ -134,7 +626,9 @@
       yearSelect.appendChild(opt);
     }
     yearSelect.addEventListener('change', checkReady);
+
     let selectedSoba = '', selectedSobaBtn = null;
+
     function selectSoba(btn, name) {
       if (selectedSobaBtn) selectedSobaBtn.classList.remove('selected');
       selectedSobaBtn = btn; btn.classList.add('selected');
@@ -143,37 +637,43 @@
     function checkReady() {
       document.getElementById('fortuneBtn').disabled = !(yearSelect.value && selectedSoba);
     }
+
     function drawFortune() {
       const year = yearSelect.value;
       if (!year || !selectedSoba) return;
       const rand = Math.random();
       let result, cssClass;
-      if (rand < 0.33) { result = '大吉'; cssClass = 'daikichi'; }
-      else if (rand < 0.67) { result = '吉'; cssClass = 'kichi'; }
-      else { result = '凶'; cssClass = 'kyo'; }
-      const pat = fortunes[result][Math.floor(Math.random() * 10)];
+      if (rand < 0.33)      { result = '大吉'; cssClass = 'daikichi'; }
+      else if (rand < 0.67) { result = '吉';   cssClass = 'kichi'; }
+      else                  { result = '凶';   cssClass = 'kyo'; }
+
+      const pat = fortunes[result][Math.floor(Math.random() * fortunes[result].length)];
       const card = document.getElementById('resultCard');
       card.className = 'result-card ' + cssClass;
       document.getElementById('resultOmikuji').textContent = result;
       document.getElementById('resultSoba').textContent = '▶ ' + selectedSoba + ' ◀';
       document.getElementById('resultYear').textContent = year + ' 年生まれ';
       document.getElementById('fortuneText').innerHTML =
-        '<span class="keyword">' + pat.keyword + '</span><br>' +
-        '<span class="fortune-main">' + pat.main.replace(/\n/g, '<br>') + '</span>' +
-        '<p class="fortune-detail">' + pat.detail.replace(/\n/g, '<br>') + '</p>';
+        `<span class="keyword">${pat.keyword}</span><br>` +
+        `<span class="fortune-main">${pat.main.replace(/\n/g,'<br>')}</span>` +
+        `<p class="fortune-detail">${pat.detail.replace(/\n/g,'<br>')}</p>`;
+
       const bonusArea = document.getElementById('bonusArea');
       if (result === '大吉') {
-        bonusArea.innerHTML = '<div class="bonus-badge bonus-daikichi">🎁 大吉の方には、本日<strong>小鉢かひとくち甘味</strong>をサービスいたします。<br>スタッフにお声がけください。</div>';
+        bonusArea.innerHTML = `<div class="bonus-badge bonus-daikichi">🎁 大吉の方には、本日<strong>小鉢かひとくち甘味</strong>をサービスいたします。<br>スタッフにお声がけください。</div>`;
       } else if (result === '吉') {
-        bonusArea.innerHTML = '<div class="bonus-badge bonus-daikichi" style="border-color:rgba(142,202,230,0.4);background:rgba(142,202,230,0.08);color:#8ecae6;">🎁 吉の方にも、本日<strong>小鉢かひとくち甘味</strong>をサービスいたします。<br>スタッフにお声がけください。</div>';
+        bonusArea.innerHTML = `<div class="bonus-badge bonus-daikichi" style="border-color:rgba(142,202,230,0.4);background:rgba(142,202,230,0.08);color:#8ecae6;">🎁 吉の方にも、本日<strong>小鉢かひとくち甘味</strong>をサービスいたします。<br>スタッフにお声がけください。</div>`;
       } else {
-        bonusArea.innerHTML = '<div class="bonus-badge bonus-kyo">☕ ドリンクを追加でご注文いただくと<br><strong>運気が逆転</strong>いたします！<br><span style="font-size:0.8rem;opacity:0.8;">スタッフにお声がけください。</span></div>';
+        bonusArea.innerHTML = `<div class="bonus-badge bonus-kyo">☕ ドリンクを追加でご注文いただくと<br><strong>運気が逆転</strong>いたします！<br><span style="font-size:0.8rem;opacity:0.8;">スタッフにお声がけください。</span></div>`;
       }
+
       const resultArea = document.getElementById('resultArea');
-      resultArea.classList.remove('show'); void resultArea.offsetWidth;
+      resultArea.classList.remove('show');
+      void resultArea.offsetWidth;
       resultArea.classList.add('show');
       resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+
     function resetAll() {
       yearSelect.value = '';
       if (selectedSobaBtn) selectedSobaBtn.classList.remove('selected');
@@ -181,17 +681,6 @@
       document.getElementById('fortuneBtn').disabled = true;
       document.getElementById('resultArea').classList.remove('show');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    const particlesEl = document.getElementById('particles');
-    for (let i = 0; i < 18; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.left = Math.random() * 100 + '%';
-      p.style.animationDuration = (6 + Math.random() * 10) + 's';
-      p.style.animationDelay = (-Math.random() * 15) + 's';
-      p.style.opacity = 0.1 + Math.random() * 0.2;
-      p.style.height = (10 + Math.random() * 20) + 'px';
-      particlesEl.appendChild(p);
     }
   </script>
 </body>
