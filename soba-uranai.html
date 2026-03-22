@@ -7,7 +7,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif; background: linear-gradient(160deg, #1c1207 0%, #2e1f0a 50%, #1a1500 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #f0e6c8; }
-    .container { text-align: center; padding: 40px 24px; max-width: 620px; width: 100%; }
+    .container { text-align: center; padding: 40px 24px; max-width: 640px; width: 100%; }
     .title-area { margin-bottom: 36px; }
     .title-jp { font-size: 2.6rem; letter-spacing: 10px; color: #f5d88a; text-shadow: 0 0 30px rgba(245,216,138,0.4); margin-bottom: 6px; }
     .title-sub { font-size: 0.85rem; color: #a08c60; letter-spacing: 4px; }
@@ -15,46 +15,49 @@
     .step-label { font-size: 0.72rem; letter-spacing: 4px; color: #a08c60; margin-bottom: 14px; text-transform: uppercase; }
     .step-title { font-size: 1.05rem; color: #f5d88a; margin-bottom: 18px; letter-spacing: 2px; }
     .year-select { appearance: none; background: rgba(245,216,138,0.08); border: 1px solid rgba(245,216,138,0.35); border-radius: 12px; color: #f0e6c8; font-family: inherit; font-size: 1.1rem; padding: 12px 48px 12px 20px; cursor: pointer; outline: none; width: 200px; letter-spacing: 2px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23f5d88a' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
-    .year-select:focus { border-color: rgba(245,216,138,0.7); box-shadow: 0 0 12px rgba(245,216,138,0.15); }
+    .year-select:focus { border-color: rgba(245,216,138,0.7); }
     .year-select option { background: #2e1f0a; color: #f0e6c8; }
     .soba-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .soba-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(245,216,138,0.25); border-radius: 14px; color: #f0e6c8; cursor: pointer; font-family: inherit; font-size: 0.82rem; padding: 16px 8px; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; letter-spacing: 1px; }
     .soba-btn .soba-emoji { font-size: 2rem; }
     .soba-btn:hover, .soba-btn.selected { background: rgba(245,216,138,0.14); border-color: rgba(245,216,138,0.7); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(245,216,138,0.15); color: #f5d88a; }
-    .soba-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     .fortune-btn { background: linear-gradient(135deg, #c8920a, #f5d88a); border: none; border-radius: 14px; color: #1c1207; cursor: pointer; font-family: inherit; font-size: 1.1rem; font-weight: bold; letter-spacing: 4px; padding: 16px 48px; transition: all 0.2s; margin-top: 8px; }
     .fortune-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(245,216,138,0.35); }
     .fortune-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-    .result-area { display: none; margin-top: 20px; }
+    .result-area { display: none; margin-top: 24px; }
     .result-area.show { display: block; animation: fadeIn 0.8s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    .result-card { background: rgba(255,255,255,0.04); border-radius: 20px; padding: 32px 24px; position: relative; overflow: hidden; }
+    .result-card { background: rgba(255,255,255,0.04); border-radius: 20px; padding: 36px 28px; position: relative; overflow: hidden; }
     .result-card::before { content: ''; position: absolute; inset: 0; border-radius: 20px; padding: 1px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
     .result-card.daikichi::before { background: linear-gradient(135deg, #f5d88a, #ff9f1c); }
     .result-card.kichi::before    { background: linear-gradient(135deg, #8ecae6, #a8dadc); }
     .result-card.kyo::before      { background: linear-gradient(135deg, #6d6875, #c77dff); }
-    .result-omikuji { font-size: 4.5rem; font-weight: bold; letter-spacing: 8px; margin-bottom: 12px; text-shadow: 0 0 40px currentColor; }
+    .result-omikuji { font-size: 4.5rem; font-weight: bold; letter-spacing: 8px; margin-bottom: 8px; text-shadow: 0 0 40px currentColor; }
     .daikichi .result-omikuji { color: #f5d88a; }
     .kichi    .result-omikuji { color: #8ecae6; }
     .kyo      .result-omikuji { color: #c77dff; }
-    .result-soba { font-size: 1rem; color: #a08c60; letter-spacing: 3px; margin-bottom: 20px; }
-    .result-message { font-size: 1.05rem; line-height: 1.9; color: #f0e6c8; letter-spacing: 1px; }
-    .result-message .highlight { color: #f5d88a; font-weight: bold; }
-    .kyo .result-message .highlight { color: #c77dff; }
-    .result-message .drink-hint { display: inline-block; margin-top: 12px; background: rgba(199,125,255,0.1); border: 1px solid rgba(199,125,255,0.35); border-radius: 10px; padding: 10px 20px; font-size: 0.95rem; color: #d4a8ff; }
+    .result-soba { font-size: 0.9rem; color: #a08c60; letter-spacing: 3px; margin-bottom: 4px; }
+    .result-year { font-size: 0.85rem; color: #a08c60; margin-bottom: 20px; }
+    .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,216,138,0.4), transparent); margin: 14px auto 20px; }
+    .fortune-text { font-size: 1.0rem; line-height: 2.0; color: #f0e6c8; letter-spacing: 1px; margin-bottom: 20px; }
+    .fortune-text .keyword { display: inline-block; font-size: 0.78rem; letter-spacing: 2px; color: #a08c60; margin-bottom: 8px; }
+    .fortune-main { font-size: 1.05rem; color: #f5ead2; font-weight: bold; }
+    .fortune-detail { font-size: 0.88rem; color: #c8b888; line-height: 1.8; margin-top: 8px; }
+    .bonus-badge { display: inline-block; border-radius: 12px; padding: 12px 20px; font-size: 0.95rem; margin-top: 12px; line-height: 1.6; letter-spacing: 1px; }
+    .bonus-daikichi { background: rgba(245,216,138,0.12); border: 1px solid rgba(245,216,138,0.4); color: #f5d88a; }
+    .bonus-kyo { background: rgba(199,125,255,0.1); border: 1px solid rgba(199,125,255,0.35); color: #d4a8ff; }
+    .reset-btn { display: inline-block; margin-top: 20px; background: transparent; border: 1px solid rgba(245,216,138,0.3); border-radius: 10px; color: #a08c60; cursor: pointer; font-family: inherit; font-size: 0.85rem; padding: 10px 28px; transition: all 0.2s; letter-spacing: 2px; }
+    .reset-btn:hover { border-color: rgba(245,216,138,0.7); color: #f5d88a; }
     .particles { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: -1; }
     .particle { position: absolute; width: 3px; height: 20px; background: rgba(245,216,138,0.15); border-radius: 2px; animation: fall linear infinite; }
     @keyframes fall { from { transform: translateY(-20px) rotate(15deg); opacity: 0.6; } to { transform: translateY(110vh) rotate(15deg); opacity: 0; } }
-    .reset-btn { display: inline-block; margin-top: 20px; background: transparent; border: 1px solid rgba(245,216,138,0.3); border-radius: 10px; color: #a08c60; cursor: pointer; font-family: inherit; font-size: 0.85rem; padding: 10px 28px; transition: all 0.2s; letter-spacing: 2px; }
-    .reset-btn:hover { border-color: rgba(245,216,138,0.7); color: #f5d88a; }
-    .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,216,138,0.4), transparent); margin: 16px auto; }
   </style>
 </head>
 <body>
   <div class="particles" id="particles"></div>
   <div class="container">
     <div class="title-area">
-      <div class="title-jp">蕎麦占い</div>
+      <div class="title-jp">蕎　麦　占　い</div>
       <div class="title-sub">SOBA FORTUNE TELLING</div>
     </div>
     <div class="step-card">
@@ -66,25 +69,125 @@
       <div class="step-label">Step 2</div>
       <div class="step-title">🍜 お蕎麦を一品お選びください</div>
       <div class="soba-grid">
-        <button class="soba-btn" onclick="selectSoba(this, 'せいろそば')"><span class="soba-emoji">🍱</span>せいろそば</button>
-        <button class="soba-btn" onclick="selectSoba(this, 'かけそば')"><span class="soba-emoji">🍜</span>かけそば</button>
-        <button class="soba-btn" onclick="selectSoba(this, '納豆そば')"><span class="soba-emoji">🫘</span>納豆そば</button>
-        <button class="soba-btn" onclick="selectSoba(this, '鴨せいろ蕎麦')"><span class="soba-emoji">🦆</span>鴨せいろ蕎麦</button>
-        <button class="soba-btn" onclick="selectSoba(this, '天ぷらせいろ')"><span class="soba-emoji">🍤</span>天ぷらせいろ</button>
+        <button class="soba-btn" onclick="selectSoba(this,'せいろそば')"><span class="soba-emoji">🍱</span>せいろそば</button>
+        <button class="soba-btn" onclick="selectSoba(this,'かけそば')"><span class="soba-emoji">🍜</span>かけそば</button>
+        <button class="soba-btn" onclick="selectSoba(this,'納豆そば')"><span class="soba-emoji">🫘</span>納豆そば</button>
+        <button class="soba-btn" onclick="selectSoba(this,'鴨せいろ蕎麦')"><span class="soba-emoji">🦆</span>鴨せいろ蕎麦</button>
+        <button class="soba-btn" onclick="selectSoba(this,'天ぷらせいろ')"><span class="soba-emoji">🍤</span>天ぷらせいろ</button>
       </div>
     </div>
-    <button class="fortune-btn" id="fortuneBtn" onclick="drawFortune()" disabled>✨ 占う ✨</button>
+    <button class="fortune-btn" id="fortuneBtn" onclick="drawFortune()" disabled>✨ 占 う ✨</button>
     <div class="result-area" id="resultArea">
       <div class="result-card" id="resultCard">
         <div class="result-omikuji" id="resultOmikuji"></div>
-        <div class="divider"></div>
         <div class="result-soba" id="resultSoba"></div>
-        <div class="result-message" id="resultMessage"></div>
+        <div class="result-year" id="resultYear"></div>
+        <div class="divider"></div>
+        <div class="fortune-text" id="fortuneText"></div>
+        <div id="bonusArea"></div>
       </div>
       <button class="reset-btn" onclick="resetAll()">🔄 もう一度占う</button>
     </div>
   </div>
   <script>
+    const fortunes = {
+      大吉: [
+        { keyword:'【 運勢 ・ 大吉 】', main:'万事において天の恵みを受ける時。
+思い切って行動すれば、必ず道は開ける。', detail:'願い事は叶う。待ち人は来たる。失せ物は見つかる。
+旅行・商売・縁談、すべてに好機あり。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'春の陽光のごとく、あらゆる幸が満ちあふれる。
+積み重ねてきた努力が、今まさに花開く吉運。', detail:'恋愛・仕事・健康のすべてに追い風が吹いている。
+人との縁を大切にすれば、さらなる幸が舞い込む。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'天地の気が整い、何事も順調に進む。
+今日の出会いは一生の宝になるかもしれない。', detail:'健康運・金運ともに好調。新しいことを始めるには最良の日。
+素直な心で物事にあたれ。吉はさらに大きくなる。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'高い山の頂から見渡すように、視野が広がる時。
+迷いを捨て、信念を持って歩めば、幸運は続く。', detail:'仕事は大きな成果を得る。恋は深まる。
+行動力こそが今日の運気をさらに高める鍵。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'長い雨の後の虹のように、明るい未来が目前に広がる。
+今まで耐えてきた苦労が、光輝く結果となって返ってくる。', detail:'対人運抜群。周囲の人からの信頼も高まる。
+金運・健康運ともに上昇中。今日は思い切って動くべし。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'清流のように心が澄み渡り、迷いが消える。
+あなたの誠実さが、今日は特別な幸運を引き寄せる。', detail:'願いは叶う。縁談・商談に好機。
+感謝の心を忘れずにいれば、吉運は何倍にもなる。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'星が並ぶように、好機が重なる特別な一日。
+目の前のチャンスを恐れず掴みに行くべき時。', detail:'旅先での出会い・思わぬ吉報が舞い込む暗示。
+心を開いて人と接すれば、さらなる吉運が訪れる。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'大地が実りを授けるように、今日の行動はすべて実を結ぶ。
+努力を怠らず、感謝を持って動けば万事成就。', detail:'健康・恋愛・仕事のいずれも順調。
+今日はいつも以上に自分を信じて行動せよ。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'吉風が四方から吹き込み、幸運に包まれる。
+積極的に行動することで、さらなる幸をつかむことができる。', detail:'金運上昇の兆し。人間関係も円滑に進む。
+今日という日を大切に過ごせば、明日の運気もさらに輝く。' },
+        { keyword:'【 運勢 ・ 大吉 】', main:'百花繚乱、あらゆる分野で花が咲き誇る。
+今日のあなたには、まばゆいほどの運気が宿っている。', detail:'恋愛・仕事・健康、三拍子そろった最高の吉日。
+喜びを周囲と分かち合えば、その幸はさらに大きくなる。' }
+      ],
+      吉: [
+        { keyword:'【 運勢 ・ 吉 】', main:'穏やかな風が吹く、安心の一日。
+焦らず、ゆっくりと歩めば、望むところへたどり着ける。', detail:'急ぐと迷うことあり。まず足元を固めよ。
+誠実な言動が、周囲の信頼を高めていく。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'物事は徐々に好転する兆し。
+地道な努力が報われる喜びを、もうすぐ感じることができる。', detail:'焦りは禁物。目の前のことに集中することが吉。
+信頼できる人のアドバイスを素直に受け入れると道が開ける。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'小さな幸せが積み重なり、やがて大きな喜びとなる。
+今日の丁寧な行動が、明日の運勢をさらに引き上げる。', detail:'恋愛は焦らず自然体で。仕事は丁寧さが評価される。
+健康面は食事と睡眠を大切に。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'曇り空に光が差し込むように、希望の兆しが見える。
+今は準備の時。機が熟せば、大きな実りが待っている。', detail:'焦らず、コツコツと積み上げることが大切な時期。
+信じた道を歩み続ければ、必ず報われる。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'静かな川が海へと続くように、今の努力は未来につながる。
+人の縁を大切にすると、思わぬ幸運が舞い込む。', detail:'対人運良好。感謝の言葉を伝えると関係が深まる。
+金運は安定。無駄遣いを避ければ、じわりと上昇する。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'堅実な歩みの中に、確かな喜びが宿る。
+今日の誠実さが、やがて大きな信頼となって戻ってくる。', detail:'仕事は地道な取り組みが評価される。
+恋愛は素直な気持ちを大切に。無理をせず自然体でいること。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'新芽が大地から顔を出すように、可能性が膨らむ。
+今日の一歩が、将来の大きな飛躍につながる大切な歩み。', detail:'新しいことへの挑戦に吉の日。失敗を恐れず動くべし。
+周囲への感謝を忘れずにいれば、運は自ずとついてくる。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'秋の実りのように、着実に成果が積み上がる。
+じっくりと時間をかけることで、揺るぎない幸運が訪れる。', detail:'健康運は良好。規則正しい生活がさらに運気を高める。
+仕事・学業ともに努力が正当に評価される時期。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'温かい光が差し込み、心に平和が宿る日。
+誠実な言葉と行動が、幸運を引き寄せる鍵となる。', detail:'人間関係は良好。自分から積極的に話しかけると縁が広がる。
+金運は堅調。計画的な行動が吉を引き寄せる。' },
+        { keyword:'【 運勢 ・ 吉 】', main:'緑の木々が風にそよぐように、柔らかな運気が満ちる。
+無理をせず、自分らしくいることが今日の最大の幸運。', detail:'ゆとりを持った行動が吉。心の余裕が周囲を和ませる。
+信頼できる人とともに歩めば、迷いなく前へ進める。' }
+      ],
+      凶: [
+        { keyword:'【 運勢 ・ 凶 】', main:'今は嵐の前の静けさ。無理に動かず、静かに備える時。
+辛抱強く待つことが、やがて大きな幸運を呼び込む。', detail:'急いては事を仕損じる日。慎重な判断が大切。
+人との争いごとは避け、穏やかな心で過ごすべし。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'思うようにいかないことがあるかもしれないが、それは次のための伏線。
+焦らず、しっかりと足元を固めることが肝要。', detail:'今は守りの時期。新しいことへの着手は慎重に。
+ただし、誠実な行動をとり続ければ、運気は必ず転じる。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'霧の中を歩くような、見通しの悪い一日かもしれない。
+しかし霧は必ず晴れる。今は慌てず一歩一歩進むのみ。', detail:'軽率な言動は控えるべし。丁寧な行動が運を開く。
+信頼できる人の言葉に耳を傾けることが大切。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'波が高い日は船を出さぬのが賢者の知恵。
+無理な計画は控え、今できることに集中する日。', detail:'健康面に注意。無理をせず休息を大切に。
+今日の辛抱が、明日の大吉への第一歩となる。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'試練は成長のための贈り物。乗り越えた先に光がある。
+今日起きる不運も、後から見れば大切な経験となる。', detail:'感情的な判断は避け、冷静さを保つことが吉。
+人のせいにせず、自分と向き合うことで道が開ける。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'冬の寒さが春を呼ぶように、今の困難は明るい未来への序章。
+諦めず、誠実に過ごすことで運は必ず向きを変える。', detail:'今日は重要な決断を避けた方が無難。
+小さな親切を積み重ねることが、運気好転のカギとなる。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'今は種を蒔く時。すぐに実らなくても、地道な努力を続けよ。
+誠実な心は必ず天に届き、やがて大きな実りをもたらす。', detail:'衝動的な行動は控えること。じっくり考えてから動くべし。
+身近な人への感謝を忘れないことが、運の転換点となる。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'曲がりくねった道の先に、美しい景色が待っている。
+今は道が険しくとも、歩みを止めないことが大切。', detail:'無理をせず、できることに集中するのが吉。
+口は禍の元。今日は言葉を慎み、行動で示すべし。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'竹が節をつくるように、今の苦しみは次の飛躍のための節目。
+腐らず、ただ前を向いて歩め。', detail:'健康・金運ともに注意が必要な時期。無駄遣いは控えよ。
+誠実さを貫けば、周囲からの助けが得られる暗示あり。' },
+        { keyword:'【 運勢 ・ 凶 】', main:'今日の不運は長くは続かない。嵐のあとには必ず虹が出る。
+今は静かに嵐が過ぎるのを待ち、エネルギーを蓄える時。', detail:'人との衝突に注意。自分から折れることで丸く収まる。
+小さな幸せに気づく心が、やがて大きな運気を呼び込む。' }
+      ]
+    };
     const yearSelect = document.getElementById('yearSelect');
     const currentYear = new Date().getFullYear();
     for (let y = currentYear - 10; y >= 1930; y--) {
@@ -108,19 +211,27 @@
       const rand = Math.random();
       let result, cssClass;
       if (rand < 0.33) { result = '大吉'; cssClass = 'daikichi'; }
-      else if (rand < 0.66) { result = '吉'; cssClass = 'kichi'; }
+      else if (rand < 0.67) { result = '吉'; cssClass = 'kichi'; }
       else { result = '凶'; cssClass = 'kyo'; }
+      const patterns = fortunes[result];
+      const pat = patterns[Math.floor(Math.random() * patterns.length)];
       const card = document.getElementById('resultCard');
       card.className = 'result-card ' + cssClass;
       document.getElementById('resultOmikuji').textContent = result;
       document.getElementById('resultSoba').textContent = '▶ ' + selectedSoba + ' ◀';
-      let message = '';
-      if (result === '大吉' || result === '吉') {
-        message = '<span class="highlight">' + year + '年生まれの' + result + 'を引いた貴方は、<br>今日きっといいことがある。</span>';
+      document.getElementById('resultYear').textContent = year + ' 年生まれ';
+      document.getElementById('fortuneText').innerHTML =
+        '<span class="keyword">' + pat.keyword + '</span><br>' +
+        '<span class="fortune-main">' + pat.main.replace(/\n/g, '<br>') + '</span>' +
+        '<p class="fortune-detail">' + pat.detail.replace(/\n/g, '<br>') + '</p>';
+      const bonusArea = document.getElementById('bonusArea');
+      if (result === '大吉') {
+        bonusArea.innerHTML = '<div class="bonus-badge bonus-daikichi">🎁 大吉の方には、本日<strong>小鉢かひとくち甘味</strong>をサービスいたします。<br>スタッフにお声がけください。</div>';
+      } else if (result === '吉') {
+        bonusArea.innerHTML = '<div class="bonus-badge bonus-daikichi" style="border-color:rgba(142,202,230,0.4);background:rgba(142,202,230,0.08);color:#8ecae6;">🎁 吉の方にも、本日<strong>小鉢かひとくち甘味</strong>をサービスいたします。<br>スタッフにお声がけください。</div>';
       } else {
-        message = '<span class="highlight">今日は凶が出てしまいました。<br>でもご安心を。</span><br><span class="drink-hint">☕ ドリンクを追加すれば<br>運気が逆転します！</span>';
+        bonusArea.innerHTML = '<div class="bonus-badge bonus-kyo">☕ ドリンクを追加でご注文いただくと<br><strong>運気が逆転</strong>いたします！<br><span style="font-size:0.8rem;opacity:0.8;">スタッフにお声がけください。</span></div>';
       }
-      document.getElementById('resultMessage').innerHTML = message;
       const resultArea = document.getElementById('resultArea');
       resultArea.classList.remove('show'); void resultArea.offsetWidth;
       resultArea.classList.add('show');
