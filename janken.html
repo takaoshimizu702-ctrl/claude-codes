@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>じゃんけんゲーム</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #fff; }
+    .container { text-align: center; padding: 40px 20px; max-width: 600px; width: 100%; }
+    h1 { font-size: 2.5rem; margin-bottom: 8px; letter-spacing: 4px; }
+    .subtitle { color: #aac4e0; margin-bottom: 40px; }
+    .score-board { display: flex; justify-content: center; gap: 20px; margin-bottom: 40px; }
+    .score-box { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 16px 28px; min-width: 100px; }
+    .score-box .label { font-size: 0.75rem; color: #aac4e0; letter-spacing: 2px; margin-bottom: 6px; }
+    .score-box .number { font-size: 2rem; font-weight: bold; }
+    .score-box.player .number { color: #64d8ff; }
+    .score-box.cpu .number { color: #ff6b8a; }
+    .score-box.draw .number { color: #ffd86b; }
+    .battle-area { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 40px; min-height: 160px; }
+    .hand-display { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .hand-display .label { font-size: 0.8rem; color: #aac4e0; letter-spacing: 2px; }
+    .hand-emoji { font-size: 5rem; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border-radius: 20px; border: 2px solid rgba(255,255,255,0.1); }
+    .hand-emoji.shake { animation: shake 0.5s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(-15px); } 75% { transform: translateY(15px); } }
+    .vs { font-size: 1.5rem; color: #aac4e0; font-weight: bold; }
+    .result-text { font-size: 2rem; font-weight: bold; margin-bottom: 40px; min-height: 2.5rem; transition: all 0.3s; }
+    .result-text.win { color: #64d8ff; }
+    .result-text.lose { color: #ff6b8a; }
+    .result-text.draw { color: #ffd86b; }
+    .buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .btn { background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2); border-radius: 16px; color: #fff; cursor: pointer; font-size: 1rem; padding: 16px 28px; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 110px; }
+    .btn .btn-emoji { font-size: 2.2rem; }
+    .btn:hover { background: rgba(100,200,255,0.2); border-color: rgba(100,200,255,0.6); transform: translateY(-4px); }
+    .reset-btn { margin-top: 28px; background: transparent; border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; color: #aac4e0; cursor: pointer; font-size: 0.85rem; padding: 10px 24px; }
+    .reset-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .history { margin-top: 28px; font-size: 0.85rem; color: #aac4e0; min-height: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✊ じゃんけん</h1>
+    <p class="subtitle">Rock · Paper · Scissors</p>
+    <div class="score-board">
+      <div class="score-box player"><div class="label">あなた</div><div class="number" id="playerScore">0</div></div>
+      <div class="score-box draw"><div class="label">引き分け</div><div class="number" id="drawScore">0</div></div>
+      <div class="score-box cpu"><div class="label">CPU</div><div class="number" id="cpuScore">0</div></div>
+    </div>
+    <div class="battle-area">
+      <div class="hand-display"><div class="label">あなた</div><div class="hand-emoji" id="playerHand">❓</div></div>
+      <div class="vs">VS</div>
+      <div class="hand-display"><div class="label">CPU</div><div class="hand-emoji" id="cpuHand">❓</div></div>
+    </div>
+    <div class="result-text" id="resultText">手を選んでください</div>
+    <div class="buttons">
+      <button class="btn" onclick="play('グー')"><span class="btn-emoji">✊</span><span>グー</span></button>
+      <button class="btn" onclick="play('チョキ')"><span class="btn-emoji">✌️</span><span>チョキ</span></button>
+      <button class="btn" onclick="play('パー')"><span class="btn-emoji">🖐️</span><span>パー</span></button>
+    </div>
+    <button class="reset-btn" onclick="resetGame()">🔄 スコアをリセット</button>
+    <div class="history" id="history"></div>
+  </div>
+  <script>
+    const hands = { 'グー': { emoji: '✊', beats: 'チョキ' }, 'チョキ': { emoji: '✌️', beats: 'パー' }, 'パー': { emoji: '🖐️', beats: 'グー' } };
+    let playerScore = 0, cpuScore = 0, drawScore = 0, history = [];
+    function play(playerChoice) {
+      const keys = Object.keys(hands);
+      const cpuChoice = keys[Math.floor(Math.random() * keys.length)];
+      const playerEl = document.getElementById('playerHand');
+      const cpuEl = document.getElementById('cpuHand');
+      playerEl.classList.remove('shake'); cpuEl.classList.remove('shake');
+      void playerEl.offsetWidth;
+      playerEl.classList.add('shake'); cpuEl.classList.add('shake');
+      setTimeout(() => {
+        playerEl.textContent = hands[playerChoice].emoji;
+        cpuEl.textContent = hands[cpuChoice].emoji;
+        const resultEl = document.getElementById('resultText');
+        let result, label;
+        if (playerChoice === cpuChoice) { result = 'draw'; label = '🤝 引き分け！'; drawScore++; document.getElementById('drawScore').textContent = drawScore; }
+        else if (hands[playerChoice].beats === cpuChoice) { result = 'win'; label = '🎉 あなたの勝ち！'; playerScore++; document.getElementById('playerScore').textContent = playerScore; }
+        else { result = 'lose'; label = '😢 CPUの勝ち...'; cpuScore++; document.getElementById('cpuScore').textContent = cpuScore; }
+        resultEl.className = 'result-text ' + result;
+        resultEl.textContent = label;
+        history.unshift(hands[playerChoice].emoji + ' vs ' + hands[cpuChoice].emoji + ' → ' + label);
+        if (history.length > 3) history.pop();
+        document.getElementById('history').textContent = history.join('　|　');
+      }, 500);
+    }
+    function resetGame() {
+      playerScore = 0; cpuScore = 0; drawScore = 0;
+      ['playerScore','cpuScore','drawScore'].forEach(id => document.getElementById(id).textContent = '0');
+      document.getElementById('playerHand').textContent = '❓';
+      document.getElementById('cpuHand').textContent = '❓';
+      document.getElementById('resultText').className = 'result-text';
+      document.getElementById('resultText').textContent = '手を選んでください';
+      document.getElementById('history').textContent = '';
+      history = [];
+    }
+  </script>
+</body>
+</html>
